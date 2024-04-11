@@ -1,0 +1,13 @@
+{
+    "scopeName": "source.turtlescript",
+    "patterns": [
+        {
+            "match": "\\b(begin|end|if|endif)\\b",
+            "name": "keyword.control"
+        },
+        {
+            "match": "\\b(walk|back|jump|turn)\\b",
+            "name": "keyword.operator"
+        }
+    ]
+}
