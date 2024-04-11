@@ -1,6 +1,8 @@
 {
     "files.associations": {
         "ctype.h": "c",
-        "math.h": "c"
+        "math.h": "c",
+        "turtle-types.h": "c",
+        "turtle.h": "c"
     }
 }
