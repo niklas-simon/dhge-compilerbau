@@ -41,6 +41,7 @@ function activate(context) {
         // Display a message box to the user
         vscode.window.showInformationMessage('Hello World from turtlescript!');
     });
+    var x = 1 + 2;
     context.subscriptions.push(disposable);
 }
 exports.activate = activate;

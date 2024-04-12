@@ -19,6 +19,8 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.window.showInformationMessage('Hello World from turtlescript!');
 	});
 
+	var x = 1 + 2;
+
 	context.subscriptions.push(disposable);
 }
 
