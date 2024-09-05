@@ -1,9 +1,9 @@
 
 " Kleines Testprogramm: Kreis zeichnen
 "
-" Optionale Befehlszeilen-Werte: Radius, Anzahl Teilstücke
+" Optionale Befehlszeilen-Werte: Radius, Anzahl Teilstï¿½cke
 "
-" Originalversion Alexander Hohmann & Max Jänichen 2021
+" Originalversion Alexander Hohmann & Max Jï¿½nichen 2021 cat
 " Klaus Kusche, 2022
 
 path circle(r,n)
