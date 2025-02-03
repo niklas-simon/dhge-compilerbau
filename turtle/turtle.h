@@ -77,6 +77,6 @@ extern double g_red, g_green, g_blue; // Farbe des Striches
 // arg_cnt/arg_val ist der Teil von argc/argv, der in @1, @2, ... geh�rt
 // (ohne Programmname und Sourcefile-Name)
 extern void evaluate(const treenode_t *main_tree,
-                     int arg_cnt, const char *arg_val[]);
+                     int arg_cnt, const char *arg_val[], const bool debug);
 
 #endif
