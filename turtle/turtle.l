@@ -10,6 +10,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+extern void yyerror(const char *);
+
+extern void update_location();
+
+#define YY_USER_ACTION update_location();
+
 %}
 
 %%

@@ -1,6 +1,9 @@
+%locations
+
 %{
     #include "turtle-types.h"
     #include "turtle.h"
+    #include "turtle.tab.h"
 
     #include <stdio.h>
     #include <stdlib.h>
@@ -11,12 +14,12 @@
     extern FILE *src_file;
 
     extern int yylineno;
+    extern char *yytext;
 
-    treenode_t *new_node(type_t type) {
-        treenode_t *node = malloc(sizeof(treenode_t));
-        node->type = type;
-        return node;
-    }
+    extern int yylex();
+    int yyerror(char *);
+
+    treenode_t *new_node(type_t type, YYLTYPE loc);
 %}
 
 %union {
@@ -69,93 +72,93 @@ Statements:
     }
 Statement:
     TWALK WMode Expression {
-        $$ = new_node(keyw_walk);
+        $$ = new_node(keyw_walk, @$);
         $$->d.walk = $2;
         $$->son[0] = $3;
     }
     |TWALK WUMode {
-        $$ = new_node(keyw_walk);
+        $$ = new_node(keyw_walk, @$);
         $$->d.walk = $2;
     }
     |TJUMP WMode Expression {
-        $$ = new_node(keyw_jump);
+        $$ = new_node(keyw_jump, @$);
         $$->d.walk = $2;
         $$->son[0] = $3;
     }
     |TJUMP WUMode {
-        $$ = new_node(keyw_jump);
+        $$ = new_node(keyw_jump, @$);
         $$->d.walk = $2;
     }
     |TTURN TMode Expression {
-        $$ = new_node($2);
+        $$ = new_node($2, @$);
         $$->son[0] = $3;
     }
     |TDIR Expression {
-        $$ = new_node(keyw_direction);
+        $$ = new_node(keyw_direction, @$);
         $$->son[0] = $2;
     }
     |TCOLOR Expression TCOMMA Expression TCOMMA Expression {
-        $$ = new_node(keyw_color);
+        $$ = new_node(keyw_color, @$);
         $$->son[0] = $2;
         $$->son[1] = $4;
         $$->son[2] = $6;
     }
     |TCLEAR {
-        $$ = new_node(keyw_clear);
+        $$ = new_node(keyw_clear, @$);
     }
     |TSTOP {
-        $$ = new_node(keyw_stop);
+        $$ = new_node(keyw_stop, @$);
     }
     |TFINISH {
-        $$ = new_node(keyw_finish);
+        $$ = new_node(keyw_finish, @$);
     }
     |TSTORE Expression TIN TVAR {
-        $$ = new_node(keyw_store);
+        $$ = new_node(keyw_store, @$);
         $$->d.p_name = $4;
         $$->son[0] = $2;
     }
     |TADD Expression TTO TVAR {
-        $$ = new_node(keyw_add);
+        $$ = new_node(keyw_add, @$);
         $$->d.p_name = $4;
         $$->son[0] = $2;
     }
     |TSUB Expression TFROM TVAR {
-        $$ = new_node(keyw_sub);
+        $$ = new_node(keyw_sub, @$);
         $$->d.p_name = $4;
         $$->son[0] = $2;
     }
     |TMUL TVAR TBY Expression {
-        $$ = new_node(keyw_mul);
+        $$ = new_node(keyw_mul, @$);
         $$->d.p_name = $2;
         $$->son[0] = $4;
     }
     |TDIV TVAR TBY Expression {
-        $$ = new_node(keyw_div);
+        $$ = new_node(keyw_div, @$);
         $$->d.p_name = $2;
         $$->son[0] = $4;
     }
     |TMARK {
-        $$ = new_node(keyw_mark);
+        $$ = new_node(keyw_mark, @$);
     }
     |TIF Condition TTHEN Statements TENDIF {
-        $$ = new_node(keyw_if);
+        $$ = new_node(keyw_if, @$);
         $$->son[0] = $2;
         $$->son[1] = $4;
         $$->son[2] = NULL;
     }
     |TIF Condition TTHEN Statements TELSE Statements TENDIF {
-        $$ = new_node(keyw_if);
+        $$ = new_node(keyw_if, @$);
         $$->son[0] = $2;
         $$->son[1] = $4;
         $$->son[2] = $6;
     }
     |TDO Expression TTIMES Statements TDONE {
-        $$ = new_node(keyw_do);
+        $$ = new_node(keyw_do, @$);
         $$->son[0] = $2;
         $$->son[1] = $4;
     }
     |TCOUNTER TVAR TFROM Expression CounterMode Expression TDO Statements TDONE {
-        $$ = new_node(keyw_counter);
+        $$ = new_node(keyw_counter, @$);
         $$->d.p_name = $2;
         $$->son[0] = $4;
         if ($5 == keyw_countto) {
@@ -169,7 +172,7 @@ Statement:
         $$->son[4] = $8;
     }
     |TCOUNTER TVAR TFROM Expression CounterMode Expression TSTEP Expression TDO Statements TDONE {
-        $$ = new_node(keyw_counter);
+        $$ = new_node(keyw_counter, @$);
         $$->d.p_name = $2;
         $$->son[0] = $4;
         if ($5 == keyw_countto) {
@@ -183,17 +186,17 @@ Statement:
         $$->son[4] = $10;
     }
     |TWHILE Condition TDO Statements TDONE {
-        $$ = new_node(keyw_while);
+        $$ = new_node(keyw_while, @$);
         $$->son[0] = $2;
         $$->son[1] = $4;
     }
     |TREPEAT Statements TUNTIL Condition {
-        $$ = new_node(keyw_repeat);
+        $$ = new_node(keyw_repeat, @$);
         $$->son[0] = $4;
         $$->son[1] = $2;
     }
     |TPATH TVAR OArgs {
-        $$ = new_node(keyw_path);
+        $$ = new_node(keyw_path, @$);
         $$->d.p_name = $2;
         if ($3) {
             for (int i = 0; i < MAX_ARGS; i++) {
@@ -242,54 +245,54 @@ Args:
     }
 Expression:
     TNUMBER {
-        $$ = new_node(oper_const);
+        $$ = new_node(oper_const, @$);
         $$->d.val = $1;
     }
     |TVAR {
-        $$ = new_node(name_any);
+        $$ = new_node(name_any, @$);
         $$->d.p_name = $1;
     }
     |TVAR BRArgs {
-        $$ = new_node(oper_lpar);
+        $$ = new_node(oper_lpar, @$);
         $$->d.p_name = $1;
         for (int i = 0; i < MAX_ARGS; i++) {
             $$->son[i] = $2[i];
         }
     }
     |Expression TPLUS Expression {
-        $$ = new_node(oper_add);
+        $$ = new_node(oper_add, @$);
         $$->son[0] = $1;
         $$->son[1] = $3;
     }
     |Expression TMINUS Expression {
-        $$ = new_node(oper_sub);
+        $$ = new_node(oper_sub, @$);
         $$->son[0] = $1;
         $$->son[1] = $3;
     }
     |Expression TSTAR Expression {
-        $$ = new_node(oper_mul);
+        $$ = new_node(oper_mul, @$);
         $$->son[0] = $1;
         $$->son[1] = $3;
     }
     |Expression TDASH Expression {
-        $$ = new_node(oper_div);
+        $$ = new_node(oper_div, @$);
         $$->son[0] = $1;
         $$->son[1] = $3;
     }
     |Expression TPOW Expression {
-        $$ = new_node(oper_pow);
+        $$ = new_node(oper_pow, @$);
         $$->son[0] = $1;
         $$->son[1] = $3;
     }
     |TMINUS Expression {
-        $$ = new_node(oper_neg);
+        $$ = new_node(oper_neg, @$);
         $$->son[0] = $2;
     }
     |TOBR Expression TCBR {
         $$ = $2;
     }
     |TABS Expression TABS {
-        $$ = new_node(oper_abs);
+        $$ = new_node(oper_abs, @$);
         $$->son[0] = $2;
     }
 WMode:
@@ -318,46 +321,46 @@ TMode:
     }
 Condition:
     TNOT Condition {
-        $$ = new_node(keyw_not);
+        $$ = new_node(keyw_not, @$);
         $$->son[0] = $2;
     }
     |Condition TAND Condition {
-        $$ = new_node(keyw_and);
+        $$ = new_node(keyw_and, @$);
         $$->son[0] = $1;
         $$->son[1] = $3;
     }
     |Condition TOR Condition {
-        $$ = new_node(keyw_or);
+        $$ = new_node(keyw_or, @$);
         $$->son[0] = $1;
         $$->son[1] = $3;
     }
     |Expression TEQ Expression {
-        $$ = new_node(oper_equ);
+        $$ = new_node(oper_equ, @$);
         $$->son[0] = $1;
         $$->son[1] = $3;
     }
     |Expression TNEQ Expression {
-        $$ = new_node(oper_nequ);
+        $$ = new_node(oper_nequ, @$);
         $$->son[0] = $1;
         $$->son[1] = $3;
     }
     |Expression TLT Expression {
-        $$ = new_node(oper_less);
+        $$ = new_node(oper_less, @$);
         $$->son[0] = $1;
         $$->son[1] = $3;
     }
     |Expression TLE Expression {
-        $$ = new_node(oper_lequ);
+        $$ = new_node(oper_lequ, @$);
         $$->son[0] = $1;
         $$->son[1] = $3;
     }
     |Expression TGT Expression {
-        $$ = new_node(oper_grtr);
+        $$ = new_node(oper_grtr, @$);
         $$->son[0] = $1;
         $$->son[1] = $3;
     }
     |Expression TGE Expression {
-        $$ = new_node(oper_gequ);
+        $$ = new_node(oper_gequ, @$);
         $$->son[0] = $1;
         $$->son[1] = $3;
     }
@@ -377,7 +380,7 @@ Definitions:
 Definition:
     // not a statement -> will not get into actual tree -> save in name_tab
     TPATH TVAR OParams Statements TENDPATH {
-        funcdef_t *func = malloc(sizeof(funcdef_t));
+        funcdef_t *func = (funcdef_t *)malloc(sizeof(funcdef_t));
         func->body = $4;
         func->ret = NULL;
         if ($3) {
@@ -389,7 +392,7 @@ Definition:
         $2->type = name_path;
     }
     |TCALC TVAR BRParams OStatements TRETURNS Expression TENDCALC {
-        funcdef_t *func = malloc(sizeof(funcdef_t));
+        funcdef_t *func = (funcdef_t *)malloc(sizeof(funcdef_t));
         func->body = $4;
         func->ret = $6;
         if ($3) {
@@ -441,6 +444,46 @@ Params:
     }
 %%
 // Das folgende wird an's hintere Ende des erzeugten .c-Programms kopiert
+
+YYLTYPE yylloc = (YYLTYPE) {
+    .first_line = 0,
+    .last_line = 0,
+    .first_column = 0,
+    .last_column = 0
+};
+
+void update_location() {
+    yylloc.first_line = yylloc.last_line;
+    yylloc.first_column = yylloc.last_column;
+    for(int i = 0; yytext[i] != '\0'; i++) {
+        if(yytext[i] == '\n') {
+            yylloc.last_line++;
+            yylloc.last_column = 0;
+        }
+        else {
+            yylloc.last_column++;
+        }
+    }
+}
+
+treenode_t *new_node(type_t type, YYLTYPE loc) {
+    treenode_t *node = (treenode_t *)malloc(sizeof(treenode_t));
+    
+    node->type = type;
+    node->pos = (srcpos_t) {
+        .line = loc.first_line,
+        .col = loc.first_column
+    };
+    node->next = NULL;
+
+    for (int i = 0; i < MAX_ARGS; i++) {
+        node->son[i] = NULL;
+    }
+
+    node->d.val = 0;
+
+    return node;
+}
 
 // Die Funktion yyerror wird aufgerufen,
 // wenn yacc erkennt, das der eingetippte Input fehlerhaft ist

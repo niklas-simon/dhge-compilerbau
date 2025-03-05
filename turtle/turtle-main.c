@@ -11,6 +11,7 @@
 #include <stdarg.h>
 
 #include "turtle.h"
+#include "debug-adapter.h"
 
 // Global: Der Sourcefile & der Programmname & der Sourcefile-Name
 FILE *src_file;
@@ -55,7 +56,16 @@ int main(int argc, const char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    bool debug = strcmp(argv[2], "-d") == 0;
+    bool debug = false;
+    const char **args = (const char **)malloc((argc - 2) * sizeof(const char *));
+    int args_len = 0;
+    for (int i = 2; i < argc; i++) {
+        if (strcmp(argv[i], "-d") == 0) {
+            debug = true;
+        } else {
+            args[args_len++] = argv[i];
+        }
+    }
 
     if (argc > 11 + debug)
     {
@@ -76,7 +86,14 @@ int main(int argc, const char *argv[])
     prog_name = argv[0];
     file_name = argv[1];
 
-    evaluate(parse(), argc - 2 - debug, &(argv[2 + debug]), debug);
+    treenode_t *main_tree = parse();
+    if (!main_tree) {
+        exit(EXIT_FAILURE);
+    }
+
+    debug_init(debug);
+
+    evaluate(main_tree, args_len, args, debug);
 
     exit(EXIT_SUCCESS);
 }

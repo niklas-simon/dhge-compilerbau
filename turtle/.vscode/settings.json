@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "capabilities.h": "c",
+        "turtle.h": "c"
+    },
+    "git.openRepositoryInParentFolders": "always"
+}

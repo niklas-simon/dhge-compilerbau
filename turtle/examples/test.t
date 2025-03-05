@@ -2,7 +2,8 @@
 " this is another comment
 
 calculation two(a, b)
-    returns |a + b|
+    store |a + b| in c
+    returns c
 endcalc
 
 path doit(n)

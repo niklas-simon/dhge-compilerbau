@@ -5,4 +5,4 @@
 
 bison -d turtle.y -Wcounterexamples &&
 flex turtle.l &&
-gcc -o turtle $(sdl2-config --cflags) sdlinterf.c lex.yy.c turtle.tab.c turtle-eval.c turtle-nametab.c turtle-main.c -lm $(sdl2-config --libs)
+gcc -o turtle $(sdl2-config --cflags) sdlinterf.c lex.yy.c turtle.tab.c turtle-eval.c turtle-nametab.c turtle-main.c debug-adapter.c -lm $(sdl2-config --libs)

@@ -79,4 +79,6 @@ extern double g_red, g_green, g_blue; // Farbe des Striches
 extern void evaluate(const treenode_t *main_tree,
                      int arg_cnt, const char *arg_val[], const bool debug);
 
+extern vstack_elem_t* get_stack_top();
+
 #endif

@@ -177,7 +177,6 @@ typedef enum {
   oper_gequ,   // >=
 } type_t;
 
-
 // Vorab-typedef's f�r alle folgenden struct's und union's
 typedef struct _srcpos srcpos_t;
 typedef struct _funcdef funcdef_t;
@@ -232,6 +231,13 @@ union _nodedata {
                        // oder keyw_walk f�r normales walk/jump,
   // leer f�r alle anderen Knotentypen
 };
+
+// Typ eines Eintrags im Stack der lokalen Variablen und Parameter
+typedef struct
+{
+    const nameentry_t *name; // Pointer auf den Namenstabellen-Eintrag
+    double val;              // Wert dieser Instanz der Variable
+} vstack_elem_t;
 
 // Im Syntaxbaum werden folgende Knotentypen verwendet,
 // mit folgenden Unter-Syntaxb�umen im son-Array (keine wenn nichts angegeben)

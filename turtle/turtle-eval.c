@@ -14,7 +14,8 @@
 #include "turtle.h"
 
 #include "sdlinterf.h"
-#include "debug-adapter.c"
+
+#include "debug-adapter.h"
 
 // RGB-Farbwerte der Default-Farbe, in der gezeichnet wird, 0 ... 100
 #define RED 100
@@ -45,13 +46,6 @@ double g_max_x = MAX_X, g_max_y = MAX_Y;
 double g_delay = WALK_DELAY;                        // Verz�gerung in ms nach jedem Zeichnen
 double g_red = RED, g_green = GREEN, g_blue = BLUE; // Farbe des Striches
 
-// Typ eines Eintrags im Stack der lokalen Variablen und Parameter
-typedef struct
-{
-    const nameentry_t *name; // Pointer auf den Namenstabellen-Eintrag
-    double val;              // Wert dieser Instanz der Variable
-} vstack_elem_t;
-
 // Initiale Gr��e des Variablen-Stacks (Anzahl Variablen)
 // (wird bei Bedarf mit realloc vergr��ert)
 #define STACK_INIT_SIZE 100
@@ -62,6 +56,22 @@ static vstack_elem_t *stack = NULL;
 static vstack_elem_t *stack_top = NULL;
 // Pointer hinter das Ende des derzeit angelegten Stacks
 static vstack_elem_t *stack_end = NULL;
+
+vstack_elem_t* get_stack_top() {
+    return stack_top;
+}
+
+command_t debug_command = no_command;
+int ignore_debug = 0;
+
+void _debug_loop(const treenode_t *t) {
+    if (ignore_debug == 0) {
+        debug_command = debug_loop(t);
+        if (debug_command == step_out) {
+            ignore_debug++;
+        }
+    }
+}
 
 // Eine Markierung
 typedef struct
@@ -136,7 +146,7 @@ static void init_stack(void);
 // Legt einen Eintrag auf den Stack
 // Macht den Stack bei Bedarf gr��er
 // Mit var gleich NULL auch f�r den Funktions-Trenn-Eintrag verwendet
-static void push(const nameentry_t *var, double val, const srcpos_t *pos);
+static vstack_elem_t *push(const nameentry_t *var, double val, const srcpos_t *pos);
 // Anzahl der Parameter einer Funktion
 static int param_cnt(const funcdef_t *f);
 // Pr�ft, ob die Argument-Anzahl im Knoten t gleich expected ist
@@ -343,7 +353,7 @@ static double *set_var(const treenode_t *t, const treenode_t *exp)
 // Initialisiert den Stack
 static void init_stack(void)
 {
-    stack = stack_top = malloc(STACK_INIT_SIZE * sizeof(vstack_elem_t));
+    stack = stack_top = (vstack_elem_t *)malloc(STACK_INIT_SIZE * sizeof(vstack_elem_t));
     mem_check(stack, "die ersten Variablen", &startpos);
     stack_end = stack + STACK_INIT_SIZE;
     // der Stack enth�lt am Boden immer ein NULL-Element
@@ -354,7 +364,7 @@ static void init_stack(void)
 // Legt einen Eintrag auf den Stack
 // Macht den Stack bei Bedarf gr��er
 // Mit var gleich NULL auch f�r den Funktions-Trenn-Eintrag verwendet
-static void push(const nameentry_t *var, double val, const srcpos_t *pos)
+static vstack_elem_t *push(const nameentry_t *var, double val, const srcpos_t *pos)
 {
     if (var != NULL)
         assert(var->type == name_var);
@@ -364,13 +374,14 @@ static void push(const nameentry_t *var, double val, const srcpos_t *pos)
         // Stack ist voll, Gr��e verdoppeln
         ptrdiff_t fill = stack_top - stack;
         ptrdiff_t size = 2 * fill;
-        stack = realloc(stack, size * sizeof(vstack_elem_t));
+        stack = (vstack_elem_t *)realloc(stack, size * sizeof(vstack_elem_t));
         mem_check(stack, "weitere Variablen", pos);
         stack_top = stack + fill;
         stack_end = stack + size;
     }
     stack_top->name = var;
     stack_top->val = val;
+    return stack_top;
 }
 
 // Anzahl der Parameter einer Funktion
@@ -419,12 +430,19 @@ static void start_call(const funcdef_t *f, const treenode_t *t)
         args[i] = expr(t->son[i]);
     }
     // Ein Stack-Eintrag mit Namenspointer NULL beginnt ein neues Stack-Frame
-    push(NULL, 0, &(t->pos));
+    vstack_elem_t *frame = push(NULL, 0, &(t->pos));
     // dann die Parameter auf dem Stack anlegen
     for (int i = 0; i < cnt; ++i)
     {
         push(f->params[i], args[i], &(t->pos));
     }
+
+    stacktrace_t *stack_obj = (stacktrace_t *)malloc(sizeof(stacktrace_t)); 
+    stack_obj->name = t->d.p_name->name;
+    stack_obj->pos = t->pos;
+    stack_obj->frame = frame;
+
+    push_stacktrace(stack_obj);
 }
 
 // R�umt den Var-Stack am Ende eines Funktions- oder Pfadaufrufs wieder auf:
@@ -439,6 +457,8 @@ static void end_call(void)
     // Ein Eintrag ohne Namen markiert das Ende des aktuellen Stack-Frames
     assert(stack_top > stack); // das unterste Element muss bleiben!
     --stack_top;               // Markierungselement auch entfernen
+
+    pop_stacktrace();
 }
 
 // F�hrt einen Calc-Funktions-Aufruf aus
@@ -455,9 +475,14 @@ static double fcall(const treenode_t *t)
             code_error(&(t->pos), "Es gibt keine Funktion mit Namen %s\n", n->name);
         }
         start_call(fdef, t);
+        int last_ignore_debug = ignore_debug;
+        if (debug_command == step_over) {
+            ignore_debug++;
+        }
         if (fdef->body != NULL)
             slist(fdef->body);
         double result = expr(fdef->ret);
+        ignore_debug = last_ignore_debug;
         end_call();
         return result;
         break;
@@ -497,7 +522,12 @@ static void pcall(const treenode_t *t)
         code_error(&(t->pos), "Es gibt keinen Pfad mit Namen %s\n", n->name);
     }
     start_call(fdef, t);
+    int last_ignore_debug = ignore_debug;
+    if (debug_command == step_over) {
+        ignore_debug++;
+    }
     slist(fdef->body);
+    ignore_debug = last_ignore_debug;
     assert(fdef->ret == NULL);
     end_call();
 }
@@ -507,7 +537,7 @@ static void pcall(const treenode_t *t)
 // Initialisiert den Stack
 static void init_marks(void)
 {
-    first_mark = top_mark = malloc(MARK_INIT_SIZE * sizeof(mstack_elem_t));
+    first_mark = top_mark = (mstack_elem_t *)malloc(MARK_INIT_SIZE * sizeof(mstack_elem_t));
     mem_check(first_mark, "die ersten Wegmarkierungen", &startpos);
     end_marks = first_mark + MARK_INIT_SIZE;
     // Der Mark-Stack enth�lt am Boden immer die Position 0/0
@@ -525,7 +555,7 @@ static void push_mark(const srcpos_t *pos)
         // Stack ist voll, Gr��e verdoppeln
         ptrdiff_t fill = top_mark - first_mark;
         ptrdiff_t size = 2 * fill;
-        first_mark = realloc(first_mark, size * sizeof(mstack_elem_t));
+        first_mark = (mstack_elem_t *)realloc(first_mark, size * sizeof(mstack_elem_t));
         mem_check(first_mark, "weitere Weg-Markierungen", pos);
         top_mark = first_mark + fill;
         end_marks = first_mark + size;
@@ -547,6 +577,7 @@ static void pop_mark(void)
 static double expr(const treenode_t *t)
 {
     assert(t);
+    _debug_loop(t);
     switch (t->type)
     {
     case name_any:
@@ -578,6 +609,7 @@ static double expr(const treenode_t *t)
 static bool cond(const treenode_t *t)
 {
     assert(t);
+    _debug_loop(t);
     switch (t->type)
     {
     case oper_equ:
@@ -609,6 +641,7 @@ static void slist(const treenode_t *t)
     assert(t);
     for (; t; t = t->next)
     {
+        _debug_loop(t);
         switch (t->type)
         {
         case keyw_walk:
@@ -659,6 +692,7 @@ static void slist(const treenode_t *t)
         case keyw_stop:
             // endlos kurze MilliSleep's, damit man das Programm abbrechen kann
             // (ein langes MilliSleep w�re nicht unterbrechbar)
+            printf("stopped\n");
             for (;;)
             {
                 sdlMilliSleep(100);
@@ -763,16 +797,19 @@ void print(const treenode_t *tree, const int indent)
     {
         printf(" ");
     }
-    printf("%d", tree->type);
-    if (tree->d.walk)
-    {
-        printf(": %d", tree->d.walk);
+    const char *type = NULL;
+    for (int i = 0; i < MAX_NAMES && name_tab[i].name; i++) {
+        if (name_tab[i].type == tree->type) {
+            type = name_tab[i].name;
+        }
     }
-    if (tree->d.val)
-    {
-        printf(": %lf", tree->d.val);
+    if (type) {
+        printf("%s", type);
+    } else {
+        printf("%d", tree->type);
     }
-    printf("\n");
+
+    printf(" %d:%d\n", tree->pos.line, tree->pos.col);
     for (int i = 0; i < MAX_ARGS; i++)
     {
         if (tree->son[i])
@@ -793,7 +830,7 @@ void print(const treenode_t *tree, const int indent)
 // (ohne Programmname und Sourcefile-Name)
 void evaluate(const treenode_t *main_tree, int arg_cnt, const char *arg_val[], const bool debug)
 {
-    // print(main_tree, 0);
+    //print(main_tree, 0);
 
     for (int i = 0; i < arg_cnt; ++i)
     {
@@ -805,11 +842,12 @@ void evaluate(const treenode_t *main_tree, int arg_cnt, const char *arg_val[], c
     init_marks();
     sdlInit();
 
-    /* if (debug)
-    {
-        // warten auf Initialize Request
-        initialize();
-    } */
+    stacktrace_t *stack_obj = (stacktrace_t *)malloc(sizeof(stacktrace_t)); 
+    stack_obj->name = "main";
+    stack_obj->pos = main_tree->pos;
+    stack_obj->frame = stack;
+
+    push_stacktrace(stack_obj);
 
     slist(main_tree);
 
