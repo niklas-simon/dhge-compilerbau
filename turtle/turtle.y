@@ -1,5 +1,3 @@
-%locations
-
 %{
     #include "turtle-types.h"
     #include "turtle.h"
@@ -7,6 +5,8 @@
 
     #include <stdio.h>
     #include <stdlib.h>
+    #include <string.h>
+    #include <errno.h>
 
     treenode_t *root;
 
@@ -21,6 +21,8 @@
 
     treenode_t *new_node(type_t type, YYLTYPE loc);
 %}
+
+%locations
 
 %union {
     treenode_t *node;
@@ -55,7 +57,7 @@ Program:
     Definitions TBEGIN Statements TEND {
         root = $3;
     }
-OStatements:
+OStatements: /* Optional Statements */
     /* empty */ {
         $$ = NULL;
     }
@@ -64,8 +66,8 @@ OStatements:
     }
 Statements:
     Statement Statements {
-        $1->next = $2;
-        $$ = $1;
+        $1->next = $2;  /* Link next pointer of first statement to following statements */
+        $$ = $1;        /* Return the first statement */
     }
     |Statement {
         $$ = $1;
@@ -159,31 +161,31 @@ Statement:
     }
     |TCOUNTER TVAR TFROM Expression CounterMode Expression TDO Statements TDONE {
         $$ = new_node(keyw_counter, @$);
-        $$->d.p_name = $2;
-        $$->son[0] = $4;
-        if ($5 == keyw_countto) {
+        $$->d.p_name = $2; /* Name of the counter variable */
+        $$->son[0] = $4;   /* Start value */
+        if ($5 == keyw_countto) { /* Son 1 => value if "to", Son 2 => value if "downto" */
             $$->son[1] = $6;
             $$->son[2] = NULL;
         } else {
             $$->son[1] = NULL;
             $$->son[2] = $6;
         }
-        $$->son[3] = NULL;
-        $$->son[4] = $8;
+        $$->son[3] = NULL; /* Son 3 is reserved for step => in this case no step */
+        $$->son[4] = $8;   /* Statements to be executed */
     }
     |TCOUNTER TVAR TFROM Expression CounterMode Expression TSTEP Expression TDO Statements TDONE {
         $$ = new_node(keyw_counter, @$);
-        $$->d.p_name = $2;
-        $$->son[0] = $4;
-        if ($5 == keyw_countto) {
+        $$->d.p_name = $2; /* Name of the counter variable */
+        $$->son[0] = $4;   /* Start value */
+        if ($5 == keyw_countto) { /* Son 1 => value if "to", Son 2 => value if "downto" */
             $$->son[1] = $6;
             $$->son[2] = NULL;
         } else {
             $$->son[1] = NULL;
             $$->son[2] = $6;
         }
-        $$->son[3] = $8;
-        $$->son[4] = $10;
+        $$->son[3] = $8;  /* Step value */
+        $$->son[4] = $10; /* Statements to be executed */
     }
     |TWHILE Condition TDO Statements TDONE {
         $$ = new_node(keyw_while, @$);
@@ -197,8 +199,10 @@ Statement:
     }
     |TPATH TVAR OArgs {
         $$ = new_node(keyw_path, @$);
-        $$->d.p_name = $2;
-        if ($3) {
+        $$->d.p_name = $2; /* Name of the function */
+        
+        /* If arguments exist, add them as sons */
+        if ($3) { 
             for (int i = 0; i < MAX_ARGS; i++) {
                 $$->son[i] = $3[i];
             }
@@ -215,8 +219,8 @@ OArgs:
             $$[i] = $1[i];
         }
     }
-BRArgs:
-    TOBR TCBR {
+BRArgs: /* Bracketed arguments */
+    TOBR TCBR { /* empty brackets */
         for (int i = 0; i < MAX_ARGS; i++) {
             $$[i] = NULL;
         }
@@ -248,11 +252,11 @@ Expression:
         $$ = new_node(oper_const, @$);
         $$->d.val = $1;
     }
-    |TVAR {
+    |TVAR { /* Variable */
         $$ = new_node(name_any, @$);
         $$->d.p_name = $1;
     }
-    |TVAR BRArgs {
+    |TVAR BRArgs { /* Function call */
         $$ = new_node(oper_lpar, @$);
         $$->d.p_name = $1;
         for (int i = 0; i < MAX_ARGS; i++) {
@@ -295,21 +299,21 @@ Expression:
         $$ = new_node(oper_abs, @$);
         $$->son[0] = $2;
     }
-WMode:
+WMode: /* Walk Mode (With following expression)*/
     /* empty */ {
         $$ = keyw_walk;
     }
     |TBACK {
         $$ = keyw_back;
     }
-WUMode:
+WUMode: /* Walk Mode (Without following expression, e.g. "home" and "mark")*/ 
     THOME {
         $$ = keyw_home;
     }
     |TMARK {
         $$ = keyw_mark;
     }
-TMode:
+TMode: /* Turn Mode */
     /* empty */ {
         $$ = keyw_right;
     }
@@ -382,7 +386,7 @@ Definition:
     TPATH TVAR OParams Statements TENDPATH {
         funcdef_t *func = (funcdef_t *)malloc(sizeof(funcdef_t));
         func->body = $4;
-        func->ret = NULL;
+        func->ret = NULL; // Path functions have no return value
         if ($3) {
             for (int i = 0; i < MAX_ARGS; i++) {
                 func->params[i] = $3[i];
@@ -403,17 +407,6 @@ Definition:
         $2->d.func = func;
         $2->type = name_calc;
     }
-BRParams:
-    TOBR TCBR {
-        for (int i = 0; i < MAX_ARGS; i++) {
-            $$[i] = NULL;
-        }
-    }
-    |TOBR Params TCBR {
-        for (int i = 0; i < MAX_ARGS; i++) {
-            $$[i] = $2[i];
-        }
-    }
 OParams:
     /* empty */ {
         for (int i = 0; i < MAX_ARGS; i++) {
@@ -425,10 +418,25 @@ OParams:
             $$[i] = $1[i];
         }
     }
+BRParams: /* Bracketed parameters */
+    TOBR TCBR { /* empty brackets */
+        for (int i = 0; i < MAX_ARGS; i++) {
+            $$[i] = NULL;
+        }
+    }
+    |TOBR Params TCBR {
+        for (int i = 0; i < MAX_ARGS; i++) {
+            $$[i] = $2[i];
+        }
+    }
 Params:
     Params TCOMMA TVAR {
         int i;
         for (i = 0; i < MAX_ARGS && $1[i]; i++) {
+            if ($1[i] && strcmp($1[i]->name, $3->name) == 0) {
+                yyerror("Duplicate params!");
+            }
+
             $$[i] = $1[i];
         }
         if (i >= MAX_ARGS) {
@@ -443,14 +451,6 @@ Params:
         }
     }
 %%
-// Das folgende wird an's hintere Ende des erzeugten .c-Programms kopiert
-
-YYLTYPE yylloc = (YYLTYPE) {
-    .first_line = 0,
-    .last_line = 0,
-    .first_column = 0,
-    .last_column = 0
-};
 
 void update_location() {
     yylloc.first_line = yylloc.last_line;
@@ -466,8 +466,14 @@ void update_location() {
     }
 }
 
+// TODO: Doxygen
 treenode_t *new_node(type_t type, YYLTYPE loc) {
     treenode_t *node = (treenode_t *)malloc(sizeof(treenode_t));
+
+    if (node == NULL) {
+        fprintf(stderr, "Error allocating memory for a new node: %s\n", strerror(errno));
+        exit(EXIT_FAILURE);
+    }
     
     node->type = type;
     node->pos = (srcpos_t) {

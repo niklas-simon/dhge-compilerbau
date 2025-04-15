@@ -66,7 +66,7 @@ void print_help() {
 
 command_t user_eval() {
     char *line = NULL;
-    int n = 0;
+    size_t n = 0;
     int size = getline(&line, &n, stdin);
 
     char command[16];
@@ -226,7 +226,7 @@ command_t user_eval() {
         if (strcmp(arg, "out") == 0) {
             return step_out;
         }
-        printf("invalid option. Type help for more information\n", arg);
+        printf("invalid option: %s. Type help for more information\n", arg);
         fflush(stdout);
         return no_command;
     }
