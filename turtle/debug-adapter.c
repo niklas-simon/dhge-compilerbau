@@ -298,7 +298,7 @@ command_t user_eval() {
 
         // Einlesen des Frame-Index
         char arg[MAX_COMMAND_ARG_LENGTH];
-        line_ptr = get_arg(line_ptr, arg, sizeof(arg)) + 1; // TODO: +1
+        line_ptr = get_arg(line_ptr, arg, sizeof(arg)) + 1;
         char *endptr;
         int frame_index = strtol(arg, &endptr, 10);
 
