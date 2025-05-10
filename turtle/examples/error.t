@@ -29,7 +29,7 @@ begin
     store @2 in steps
   endif
 
-  store 1 in @delay
+  sstore 1 in @delay
 
   path circle(radius,steps)
   jump home

@@ -91,7 +91,7 @@ extern void update_location();
 
 [@a-zA-Z_][@a-zA-Z0-9_]* {
     type_t type;
-    nameentry_t *entry;
+    nameentry_t *entry = NULL;
     for (int i = 0; i < MAX_NAMES; i++) {
         if (!name_tab[i].name) {
             name_tab[i].name = strdup(yytext);

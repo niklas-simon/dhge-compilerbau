@@ -3,7 +3,7 @@
 "
 " Optionale Befehlszeilen-Werte: Radius, Anzahl Teilst�cke
 "
-" Originalversion Alexander Hohmann & Max J�nichen 2021 cat
+" Originalversion Alexander Hohmann & Max J�nichen 2021
 " Klaus Kusche, 2022
 
 path circle(r,n)

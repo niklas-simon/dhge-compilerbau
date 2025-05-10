@@ -496,6 +496,7 @@ treenode_t *new_node(type_t type, YYLTYPE loc) {
 // wir geben einfach die von yacc gelieferte Fehlermeldung aus
 int yyerror(char *s) {
     printf("line %d: %s\n", yylineno, s);
+    exit(EXIT_FAILURE);
 }
 
 // Das Hauptprogramm
