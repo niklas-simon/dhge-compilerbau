@@ -466,7 +466,15 @@ void update_location() {
     }
 }
 
-// TODO: Doxygen
+/**
+ * Erstellt einen neuen Knoten und initialisiert ihn auf den übergebenen Typ.
+ * Der Knoten hat zunächst keine Kinder und ist nicht mit einem anderen Knoten verbunden.
+ * Zusätzlich wird die Position des Knotens im Quelltext gesetzt.
+ *
+ * @param type Der Typ des Knotens.
+ * @param loc  Die Position des Knotens im Quelltext.
+ * @return Ein Pointer auf den neu erstellten Knoten.
+ */
 treenode_t *new_node(type_t type, YYLTYPE loc) {
     treenode_t *node = (treenode_t *)malloc(sizeof(treenode_t));
 
