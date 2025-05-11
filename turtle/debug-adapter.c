@@ -79,6 +79,7 @@ srcpos_t current_pos;
 /**
  * Fügt einen Stacktrace-Eintrag hinzu
  * Der Eintrag wird in einem Array gespeichert und der Stacktrace-Zähler erhöht.
+ * Diese Funktion muss bei jedem Funktionsaufruf aufgerufen werden.
  * @param t Zeiger auf den initialisierten Stacktrace-Eintrag
  */
 void push_stacktrace(stacktrace_t *t) {
@@ -95,6 +96,7 @@ void push_stacktrace(stacktrace_t *t) {
 /**
  * Entfernt den letzten Stacktrace-Eintrag
  * Der Stacktrace-Zähler wird verringert und der Speicher des Eintrags freigegeben.
+ * Diese Funktion muss bei jedem Funktionsende aufgerufen werden.
  */
 void pop_stacktrace() {
     free(stacktrace[--stack_size]);

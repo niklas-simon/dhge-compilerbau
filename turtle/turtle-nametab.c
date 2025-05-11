@@ -1,27 +1,27 @@
 
 // Turtle-Graphics-Compiler:
-// Deklaration und Initialisierung des Arrays für die Namenstabelle
+// Deklaration und Initialisierung des Arrays fÃ¼r die Namenstabelle
 //
 // Klaus Kusche 2021, 2022
 
-// für sin, cos, ...
+// fÃ¼r sin, cos, ...
 #include <math.h>
-// für NULL
+// fÃ¼r NULL
 #include <stddef.h>
 
 #include "turtle.h"
 
-// Das Array für alle Namen
-// ein linear durchsuchtes Array ist performancemäßig eine Katastrophe
+// Das Array fÃ¼r alle Namen
+// ein linear durchsuchtes Array ist performancemÃ¤ÃŸig eine Katastrophe
 // (und limitiert die Anzahl der Namen),
 // aber unsere Programme werden kurz sein und nur wenige Namen enthalten...
-// Bei einem ernsthaften Compiler müsste das eine Hashtable oder ein Baum sein!
+// Bei einem ernsthaften Compiler mÃ¼sste das eine Hashtable oder ein Baum sein!
 // Vorne im Array stehen alle vordefinierten globalen Variablen,
-// vordefinierten Funktionen und Schlüsselwörter
+// vordefinierten Funktionen und SchlÃ¼sselwÃ¶rter
 // dahinter werden vom Lexer alle eigenen Namen eingetragen
 //
 // Da name_tab global ist,
-// haben alle unbelegten Einträge automatisch NULL als Namens-Pointer
+// haben alle unbelegten EintrÃ¤ge automatisch NULL als Namens-Pointer
 // Man durchsucht das Array daher bis zum ersten NULL-Eintrag,
 // und wenn man den Namen bis dahin nicht gefunden hat,
 // kann man ihn in diesem NULL-Eintrag neu speichern
@@ -73,7 +73,7 @@ nameentry_t name_tab[MAX_NAMES] =
   { keyw_add, "add", { 0 } },
   { keyw_addto, "zu", { 0 } },
   { keyw_sub, "sub", { 0 } },
-  { keyw_subfrom, "von", { 0 } },  // auch für countfrom
+  { keyw_subfrom, "von", { 0 } },  // auch fÃ¼r countfrom
   { keyw_mul, "mul", { 0 } },
   { keyw_mulby, "mit", { 0 } },
   { keyw_div, "div", { 0 } },
@@ -87,7 +87,7 @@ nameentry_t name_tab[MAX_NAMES] =
   { keyw_times, "mal", { 0 } },
   { keyw_done, "mach_ende", { 0 } },
   { keyw_counter, "zaehler", { 0 } },
-  { keyw_countto, "bis", { 0 } },   // auch für until
+  { keyw_countto, "bis", { 0 } },   // auch fÃ¼r until
   { keyw_downto, "runter_bis", { 0 } },
   { keyw_step, "schritt", { 0 } },
   { keyw_while, "solange", { 0 } },
@@ -148,11 +148,11 @@ nameentry_t name_tab[MAX_NAMES] =
   { keyw_store, "store", { 0 } },
   { keyw_in, "in", { 0 } },
   { keyw_add, "add", { 0 } },
-  { keyw_addto, "to", { 0 } },      // auch für countto
+  { keyw_addto, "to", { 0 } },      // auch fÃ¼r countto
   { keyw_sub, "sub", { 0 } },
-  { keyw_subfrom, "from", { 0 } },  // auch für countfrom
+  { keyw_subfrom, "from", { 0 } },  // auch fÃ¼r countfrom
   { keyw_mul, "mul", { 0 } },
-  { keyw_mulby, "by", { 0 } },      // auch für divby
+  { keyw_mulby, "by", { 0 } },      // auch fÃ¼r divby
   { keyw_div, "div", { 0 } },
   { keyw_mark, "mark", { 0 } },
   { keyw_if, "if", { 0 } },

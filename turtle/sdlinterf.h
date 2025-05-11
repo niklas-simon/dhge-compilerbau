@@ -1,19 +1,19 @@
-// SDL-Interface-Header für C / C++
+// SDL-Interface-Header fÃ¼r C / C++
 //
-// Klaus Kusche, 2012, vereinheitlichte Version für alle Beispiele
+// Klaus Kusche, 2012, vereinheitlichte Version fÃ¼r alle Beispiele
 
 #ifndef _SDLINTERF_H
 #define _SDLINTERF_H
 
 // Breite des Grafik-Fensters (in Pixeln)
 #define SDL_X_SIZE 800
-// Höhe des Grafik-Fensters (in Pixeln)
+// HÃ¶he des Grafik-Fensters (in Pixeln)
 #define SDL_Y_SIZE 600
 
-// Ändert die Berechnung des Farbkreises für sdlDrawCyclicPoint:
+// Ã„ndert die Berechnung des Farbkreises fÃ¼r sdlDrawCyclicPoint:
 // Ohne COLOR_WHEEL_... (default) rotiert der Farbkreis
-//   zwischen rot, gelb, grün, cyan, blau und lila
-// Mit COLOR_WHEEL_RGB rotiert er nur zwischen rot, grün und blau
+//   zwischen rot, gelb, grÃ¼n, cyan, blau und lila
+// Mit COLOR_WHEEL_RGB rotiert er nur zwischen rot, grÃ¼n und blau
 // Mit COLOR_WHEEL_CMY rotiert er nur zwischen gelb, cyan und lila
 // COLOR_WHEEL_CMY ist heller, COLOR_WHEEL_RGB dunkler als die Default-Farben
 //#define COLOR_WHEEL_RGB 1
@@ -25,15 +25,15 @@ extern "C" {
 
 // Initialisiere die SDL (mach das Grafikfenster auf)
 // 
-// Sollte im main möglichst bald aufgerufen werden
+// Sollte im main mÃ¶glichst bald aufgerufen werden
 extern void sdlInit(void);
 
-// Schließe SDL (mach das Grafikfenster wieder zu)
+// SchlieÃŸe SDL (mach das Grafikfenster wieder zu)
 // 
 // Sollte im main vor Ende des Programms aufgerufen werden
 extern void sdlExit(void);
 
-// Lösche das Grafikfenster (mach alle Pixel schwarz)
+// LÃ¶sche das Grafikfenster (mach alle Pixel schwarz)
 // (nur intern, wirklich angezeigt wird erst bei sdlUpdate)
 extern void sdlSetBlack(void);
 
@@ -42,16 +42,16 @@ extern void sdlSetBlack(void);
 //
 // x, y   ... Koordinaten
 //            (0 / 0 ist links oben, SDL_X_SIZE-1 / SDL_Y_SIZE-1 ist rechts unten)
-// r,g,b  ... Farbwerte rot, grün, blau (jeweils 0 ... 255)
+// r,g,b  ... Farbwerte rot, grÃ¼n, blau (jeweils 0 ... 255)
 extern void sdlDrawPoint(int x, int y, int r, int g, int b);
 
-// Zeichne einen Punkt mit zyklischer Farbe (für Fraktale)
+// Zeichne einen Punkt mit zyklischer Farbe (fÃ¼r Fraktale)
 // (nur intern, wirklich angezeigt wird erst bei sdlUpdate)
 //
 // x, y   ... Koordinaten (wie oben)
 // color  ... Farbwert (beliebiger int-Wert,
 //            wird in einen zyklischen Farbkreis mit 192 Farben umgerechnet,
-//            dessen Farben von NEW_COLOR_WHEEL abhängen.
+//            dessen Farben von NEW_COLOR_WHEEL abhÃ¤ngen.
 //            Negative Zahlen ergeben schwarz)
 void sdlDrawCyclicPoint(int x, int y, int color);
 
@@ -66,13 +66,13 @@ void sdlDrawCyclicPoint(int x, int y, int color);
 extern void sdlDrawRect(int centerX, int centerY, int extX, int extY,
                         int r, int g, int b);
 
-// Zeichne ein Rechteck mit zwei gegenüberliegenden Ecken
+// Zeichne ein Rechteck mit zwei gegenÃ¼berliegenden Ecken
 // (nur intern, wirklich angezeigt wird erst bei sdlUpdate).
 //
 // X1      ... X-Koordinate einer Ecke
 // Y1      ... Y-Koordinate einer Ecke
-// X2      ... X-Koordinate der gegenüberliegenden Ecke
-// Y2      ... Y-Koordinate der gegenüberliegenden Ecke
+// X2      ... X-Koordinate der gegenÃ¼berliegenden Ecke
+// Y2      ... Y-Koordinate der gegenÃ¼berliegenden Ecke
 // r,g,b   ... Farbwerte
 extern void sdlDrawRectFromTo(int X1, int Y1, int X2, int Y2,
                               int r, int g, int b);
@@ -81,7 +81,7 @@ extern void sdlDrawRectFromTo(int X1, int Y1, int X2, int Y2,
 // (nur intern, wirklich angezeigt wird erst bei sdlUpdate).
 //
 // x1, y1, x2, y2  ... Koordinaten des Anfangs- und des Endpunktes, wie oben
-// r,g,b           ... Farbwerte rot, grün, blau (jeweils 0 ... 255)
+// r,g,b           ... Farbwerte rot, grÃ¼n, blau (jeweils 0 ... 255)
 extern void sdlDrawLine(int x1, int y1, int x2, int y2, int r, int g, int b);
 
 // Zeichne eine Ellipse
@@ -91,7 +91,7 @@ extern void sdlDrawLine(int x1, int y1, int x2, int y2, int r, int g, int b);
 // centerY ... Y-Koordinate des Mittelpunktes
 // radX    ... Radius in waagrechter Richtung
 // radY    ... Radius in senkrechter Richtung
-// r,g,b   ... Farbwerte rot, grün, blau (jeweils 0 ... 255)
+// r,g,b   ... Farbwerte rot, grÃ¼n, blau (jeweils 0 ... 255)
 extern void sdlDrawCirc(int centerX, int centerY, int radX, int radY,
                         int r, int g, int b);
 
@@ -102,9 +102,9 @@ extern void sdlDrawCirc(int centerX, int centerY, int radX, int radY,
 // centerY ... Y-Koordinate des Mittelpunktes
 // radX    ... Radius in waagrechter Richtung
 // radY    ... Radius in senkrechter Richtung
-// r,g,b   ... Farbwerte rot, grün, blau (jeweils 0 ... 255)
+// r,g,b   ... Farbwerte rot, grÃ¼n, blau (jeweils 0 ... 255)
 // part    ... Bitmaske, Summe der folgenden Werte:
-//             SDL_CIRC_FILLED ... Gefüllte Fläche (sonst nur Rand)
+//             SDL_CIRC_FILLED ... GefÃ¼llte FlÃ¤che (sonst nur Rand)
 //             SDL_CIRC_UPPER_RIGHT ... Quadrant rechts oben,
 //             SDL_CIRC_LOWER_RIGHT ... Quadrant rechts unten,
 //             SDL_CIRC_UPPER_LEFT  ... Quadrant links oben,
@@ -122,7 +122,7 @@ extern void sdlDrawCirc(int centerX, int centerY, int radX, int radY,
 extern void sdlDrawCircPart(int centerX, int centerY, int radX, int radY,
                             int r, int g, int b, int part);
 
-// Aktualisiere den Bilschirm, führe die ausstehenden Zeichenbefehle aus:
+// Aktualisiere den Bilschirm, fÃ¼hre die ausstehenden Zeichenbefehle aus:
 // Alles, was intern gezeichnet wurde, wird ins Grafikfenster kopiert
 //
 // Sollte einmal nach allen Zeichenbefehlen aufgerufen werden,
@@ -130,16 +130,16 @@ extern void sdlDrawCircPart(int centerX, int centerY, int radX, int radY,
 // (d.h. beispielsweise am Ende jedes Schleifenumlaufes
 // oder sinnvollerweise vor jedem sdlMilliSleep).
 //
-// Prüft vor dem Zeichnen auch auf "Ctrl/C"
-// und ob rechts oben auf "Fenster schließen" geklickt wurde
+// PrÃ¼ft vor dem Zeichnen auch auf "Ctrl/C"
+// und ob rechts oben auf "Fenster schlieÃŸen" geklickt wurde
 extern void sdlUpdate(void);
 
 // Mache eine ms Millisekunden lange Pause.
 //
-// Achtung: Die Zeitauflösung von Windows ist 17 ms, weniger geht nicht!
+// Achtung: Die ZeitauflÃ¶sung von Windows ist 17 ms, weniger geht nicht!
 //
-// Prüft vor dem Schlafen auch auf "Ctrl/C"
-// und ob rechts oben auf "Fenster schließen" geklickt wurde
+// PrÃ¼ft vor dem Schlafen auch auf "Ctrl/C"
+// und ob rechts oben auf "Fenster schlieÃŸen" geklickt wurde
 extern void sdlMilliSleep(int ms);
 
 #ifdef __cplusplus
