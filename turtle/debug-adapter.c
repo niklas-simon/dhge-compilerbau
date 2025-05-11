@@ -488,7 +488,7 @@ void debug_init(bool _debug) {
         return;
     }
 
-    printf("Debugger active. Type help for a list of commands\n");
+    printf("debugger active. type help for a list of commands\n");
     fflush(stdout);
 
     // Warte, bis der Debugger gestartet wird
