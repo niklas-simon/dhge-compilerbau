@@ -47,3 +47,16 @@ cd dhge-compilerbau/turtle
 # Optional: Doxygen Dokumentation generieren
 doxygen
 ```
+
+## Projektverlauf
+### Schwierigkeiten
+Als besonders schwierig erwies sich das Starten mit dem Projekt. Am hilfreichsten war hierfür der Test mittels Taschenrechner-Anwendung sowie die verfügbaren Folien.  
+Insbesondere das Erstellen der `build.sh|build.cmd`, um das Projekt erst zu compilieren, erwieß sich als herausfordernd. 
+### Verlauf
+Sobald das Projekt compiliert werden konnte musste der zur Verfügung gestellte Code verstanden werden. Dies erwies sich jedoch durch die umfangreich formulierte Aufgabenstellung als recht simpel. Zur Validierung der Implementierung konnten die verfügbaren Beispiele gut verwendet werden.  
+Als dann alle Beispiele liefen, stand man vor der Frage: Was nun? Die Implementierung insgesamt war zwar anspruchsvoll, aber spaßig, daher kann man doch sicher noch etwas mehr machen. Somit kam dann die Idee der VSCode-Erweiterung.  
+Zunächst war geplant, einfaches Syntax Highlighting zum Laufen zu bekommen. Allein dadurch wird die Entwicklung von turtlescript-Programmen immens erleichtert. Für Syntax Highlighting verwendet vscode sog. Textmate-Grammatiken. Diese kategorisiert bestimmte Tokens (z.B. `if` und `else` als Konditionale oder `@1`-`@9` als globale Variablen) wodurch diese Tokens dann farbig markiert werden können. Die tatsächlich verwendete Farbe hängt dann vom verwendeten Theme ab, wird also üblicherweise nicht direkt in der Grammatik festgelegt.  
+Als das Syntax Highlighting fertig war, kam der Gedanke, ein Debugger wäre doch wünschenswert. VSCode bietet dazu ein Protokoll, welches DAP (Debug Adapter Protocol) genannt wird. Wird das Protokoll richtig implementiert, funktioniert die Oberfläche von vscode wie von Zauberhand als Debugger für die jeweilige Sprache. Hier war ebenfalls die größte Hürde, mit dem ganzen anzufangen. Zunächst muss das Protokoll grundlegend verstanden werden. Dann ist die Frage der Umsetzung. Die eigentliche Implementierung war dann, wie schon beim Kernprojekt, nur noch eine Fleißarbeit.
+### Fazit
+Insgesamt wurde das Projekt als sehr lehrreich empfunden. Unser Verständnis von Lexern, Parsern, Compilern und Interpretern wurde immens erweitert. Aber auch zu lernen, was bei VSCode im Hintergrund abläuft, war sehr interessant.  
+Die Erweiterung kann in VSCode über die ID `niklas-simon.turtlescript` oder [im VSCode Extension Marketplace](https://marketplace.visualstudio.com/items?itemName=niklas-simon.turtlescript) gefunden werden.
