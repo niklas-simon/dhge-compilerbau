@@ -1,3 +1,9 @@
+/**
+ * @file debug-adapter.c
+ * 
+ * Implementierung des Debuggers.
+ */
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,76 +14,76 @@
 #include "turtle.h"
 
 /**
- * Maximale Länge eines Debugger-Befehls
+ * Maximale Länge eines Debugger-Befehls.
  */
 #define MAX_COMMAND_LENGTH 16
 
 /**
- * Maximale Länge eines Arguments für einen Debugger-Befehl
+ * Maximale Länge eines Arguments für einen Debugger-Befehl.
  */
 #define MAX_COMMAND_ARG_LENGTH 8
 
 /**
- * Maximale Anzahl an Breakpoints
+ * Maximale Anzahl an Breakpoints.
  */
 #define MAX_BREAKPOINTS 1024
 
 /**
- * Maximale Anzahl an Stacktrace-Einträgen
+ * Maximale Anzahl an Stacktrace-Einträgen.
  */
 #define MAX_STACKTRACE_SIZE 128
 
 /**
- * Debugger Flag
+ * Debugger Flag.
  * true, wenn der Debugger aktiv ist.
  */
 bool debug = false;
 
 /**
- * Debugger Running Flag
+ * Debugger Running Flag.
  * true, wenn der Debugger das Programm ausführt.
  */
 bool running = false;
 
 /**
- * Debugger Stepping Flag
+ * Debugger Stepping Flag.
  * true, wenn der Debugger im Stepping-Modus ist.
  */
 bool stepping = false;
 
 /**
- * Array für Breakpoints
- * Die Länge des Arrays ist in br_length gespeichert.
+ * Array für Breakpoints.
+ * Die Länge des Arrays ist in ::br_length gespeichert.
  * Jeder Eintrag ist eine Zeilennummer, die einen Breakpoint darstellt.
  */
 int breakpoints[MAX_BREAKPOINTS];
 
 /**
- * Aktuelle Länge des Breakpoint-Arrays
- * Zeigt auf den nächsten freien Eintrag in breakpoints.
+ * Aktuelle Länge des Breakpoint-Arrays.
+ * Zeigt auf den nächsten freien Eintrag in ::breakpoints.
  */
 size_t br_length = 0;
 
 /**
- * Array für Stacktrace-Einträge
- * Die aktuelle Stacktrace-Größe ist in stack_size gespeichert und 
- * der zuletzt hinzugefügte Eintrag ist unter stack_size - 1 zu finden.
+ * Array für Stacktrace-Einträge.
+ * Die aktuelle Stacktrace-Größe ist in ::stack_size gespeichert und 
+ * der zuletzt hinzugefügte Eintrag ist unter ::stack_size - 1 zu finden.
  */
 stacktrace_t *stacktrace[MAX_STACKTRACE_SIZE];
 
 /**
- * Aktuelle Stacktrace-Größe
- * Zeigt auf den nächsten freien Eintrag in stacktrace.
+ * Aktuelle Stacktrace-Größe.
+ * Zeigt auf den nächsten freien Eintrag in ::stacktrace.
  */
 size_t stack_size = 0;
 
 /**
- * Aktuelle Position im Sourcefile
+ * Aktuelle Position im Sourcefile.
  */
 srcpos_t current_pos;
 
 /**
- * Fügt einen Stacktrace-Eintrag hinzu
+ * Fügt einen Stacktrace-Eintrag hinzu.
  * Der Eintrag wird in einem Array gespeichert und der Stacktrace-Zähler erhöht.
  * Diese Funktion muss bei jedem Funktionsaufruf aufgerufen werden.
  * @param t Zeiger auf den initialisierten Stacktrace-Eintrag
@@ -94,7 +100,7 @@ void push_stacktrace(stacktrace_t *t) {
 }
 
 /**
- * Entfernt den letzten Stacktrace-Eintrag
+ * Entfernt den letzten Stacktrace-Eintrag.
  * Der Stacktrace-Zähler wird verringert und der Speicher des Eintrags freigegeben.
  * Diese Funktion muss bei jedem Funktionsende aufgerufen werden.
  */
@@ -103,7 +109,7 @@ void pop_stacktrace() {
 }
 
 /**
- * Fügt einen Breakpoint hinzu
+ * Fügt einen Breakpoint hinzu.
  * Überprüft, ob die Zeilennummer bereits existiert und ob der Breakpoint-Puffer voll ist.
  * @param linenr Zeilennummer, an der der Breakpoint gesetzt werden soll
  */
@@ -126,7 +132,7 @@ void add_breakpoint(int linenr) {
 }
 
 /**
- * Entfernt einen Breakpoint
+ * Entfernt einen Breakpoint.
  * Überprüft, ob die ein Breakpoint an linenr existiert und verschiebt alle nachfolgenden 
  * Breakpoints im Array um eine Position nach vorne.
  * @param linenr Zeilennummer, an der der Breakpoint entfernt werden soll
@@ -156,8 +162,8 @@ void remove_breakpoint(int linenr) {
 }
 
 /**
- * Liest ein Argument aus einer Zeile
- * Liest Zeichen aus line in arg bis entweder '\0', ' ' oder '\n' gelesen wird
+ * Liest ein Argument aus einer Zeile.
+ * Liest Zeichen aus line in arg bis entweder '\0', ' ' oder '\n' gelesen wird.
  * @param line Zeile, die gelesen werden soll
  * @param arg Zeiger auf den Puffer, in den die Zeichen geschrieben werden
  * @param arg_len Länge des Puffers
@@ -186,7 +192,7 @@ char *get_arg(char *line, char *arg, size_t arg_len) {
 }
 
 /**
- * Gibt eine Liste der verfügbaren Befehle aus
+ * Gibt eine Liste der verfügbaren Befehle aus.
  */
 void print_help() {
     printf("available commands:\n"\
@@ -207,7 +213,7 @@ void print_help() {
 }
 
 /**
- * Liest einen Debug-Befehl von der Konsole ein und führt ihn aus
+ * Liest einen Debug-Befehl von der Konsole ein und führt ihn aus.
  * @return den ausgeführten Befehl
  */
 command_t user_eval() {
@@ -472,7 +478,7 @@ command_t user_eval() {
 }
 
 /**
- * Initialisiert den Debugger
+ * Initialisiert den Debugger.
  * Diese Funktion muss aufgerufen werden, bevor der Debugger verwendet werden kann.
  * @param _debug true, wenn der Debugger aktiviert werden soll
  */
@@ -492,7 +498,7 @@ void debug_init(bool _debug) {
 }
 
 /**
- * Führt den Debugger aus
+ * Führt den Debugger aus.
  * Diese Funktion muss bei jedem Schritt des Interpreters aufgerufen werden.
  * @param t Zeiger auf den aktuellen Tree-Node
  * @return den ausgeführten Befehl

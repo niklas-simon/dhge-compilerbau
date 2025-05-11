@@ -1,7 +1,13 @@
+/**
+ * @file debug-adapter.h
+ * 
+ * Header für den Debugger.
+ */
+
 #include "turtle-types.h"
 
 /**
- * Der Typ eines Debugger-Befehls
+ * Der Typ eines Debugger-Befehls.
  * Er wird nach jeder Aktion des Debuggers zurückgegeben.
  */
 typedef enum command_t {
@@ -12,7 +18,7 @@ typedef enum command_t {
 } command_t;
 
 /**
- * Typ eines Stackframe-Eintrags
+ * Typ eines Stackframe-Eintrags.
  */
 typedef struct stacktrace_t {
     const char *name;       ///< Name der Funktion
