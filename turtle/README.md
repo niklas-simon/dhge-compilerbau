@@ -2,7 +2,7 @@
 Ein Compiler und Debugger für die Turtle Graphics Lernsprache. 
 
 ## Compiler
-Der Compiler selbst hällt sich größtenteils an die [Aufgabenstellung](https://computerix.info/comp-bau/turtle.pdf). flex wird als Lexer-Generator verwendet und die Input-Datei dafür ist die [turtle.l](./turtle.l). Als Parser-Generator dient bison, wobei die Input-Datei die [turtle.y](./turtle.y) ist. Alle Beispiel-Turtle-Programme werden vom Compiler ohne Probleme ausgeführt (siehe [examples/](./examples/)).
+Der Compiler selbst hält sich größtenteils an die [Aufgabenstellung](https://computerix.info/comp-bau/turtle.pdf). flex wird als Lexer-Generator verwendet und die Input-Datei dafür ist die [turtle.l](./turtle.l). Als Parser-Generator dient bison, wobei die Input-Datei die [turtle.y](./turtle.y) ist. Alle Beispiel-Turtle-Programme werden vom Compiler ohne Probleme ausgeführt (siehe [examples/](./examples/)).
 
 ## Debugger
 Die Besonderheit dieses Compilers liegt darin, dass zusätzlich eine Debugger Funktionalität implementiert ist.
@@ -24,7 +24,7 @@ Bei jeder Evaluierung einer Turtle Expression und Condition, sowie bei jedem Auf
 Damit der Debugger den Stacktrace verfolgen kann, werden bei jedem Aufruf und Returnen einer Turtle Routine die Debugger Funktionen `push_stacktrace()`, sowie `pop_stacktrace()` aufgerufen.
 
 ## VS-Code Extension
-Zusätzlich wurde im eine [VS-Code Extension](https://marketplace.visualstudio.com/items?itemName=niklas-simon.turtlescript) für Turtle entwickelt. Die Extension umfasst Syntaxhighlighting, sowie Support für die in VS-Code eingebaute Debugger-Oberfläche. Der Quelltext dafür ist in einem [seperaten Repository](https://github.com/niklas-simon/dhge-turtlescript-vscode) zu finden.
+Zusätzlich wurde eine [VS-Code Extension](https://marketplace.visualstudio.com/items?itemName=niklas-simon.turtlescript) für Turtle entwickelt. Die Extension umfasst Syntaxhighlighting, sowie Support für die in VS-Code eingebaute Debugger-Oberfläche. Der Quelltext dafür ist in einem [seperaten Repository](https://github.com/niklas-simon/dhge-turtlescript-vscode) zu finden.
 
 ## Build
 ### Vorbedingungen:
