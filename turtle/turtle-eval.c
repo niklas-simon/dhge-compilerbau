@@ -1,13 +1,13 @@
 
 // Turtle-Graphics-Compiler:
-// Interpreter f�r den Syntaxbaum
+// Interpreter für den Syntaxbaum
 //
 // Klaus Kusche 2021, 2022
 
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include <stdlib.h>
-// F�r ptrdiff_t: Integer in der Gr��e der Differenz zweier Pointer
+// Für ptrdiff_t: Integer in der Größe der Differenz zweier Pointer
 #include <stddef.h>
 #include <assert.h>
 
@@ -22,17 +22,17 @@
 #define GREEN 100
 #define BLUE 0
 
-// Initiale Koordinatensystem-Gr��e (von -MAX_X/-MAX_Y bis MAX_X/MAX_Y)
-// Seitenverh�ltnis automatisch vom SDL-Fenster �bernehmen!
+// Initiale Koordinatensystem-Größe (von -MAX_X/-MAX_Y bis MAX_X/MAX_Y)
+// Seitenverhältnis automatisch vom SDL-Fenster übernehmen!
 #define MAX_X 20.0
 #define MAX_Y ((MAX_X / SDL_X_SIZE) * SDL_Y_SIZE)
 
-// Default-Wert f�r die Verz�gerung in ms nach jedem Zeichnen
+// Default-Wert für die Verzögerung in ms nach jedem Zeichnen
 #define WALK_DELAY 100
-// Default-Wert f�r die Verz�gerung in ms beim Beenden des Programmes
+// Default-Wert für die Verzögerung in ms beim Beenden des Programmes
 #define END_DELAY 2000
 
-// Speicherpl�tze f�r die vordefinierten globalen Variablen
+// Speicherplätze für die vordefinierten globalen Variablen
 // (der Wert selbstdefinierter globaler Variablen steht in der Namenstabelle)
 double g_dir = 0;        // Richtung (in Grad, wie in Mathe:
                          // 0 ist nach rechts, gegen den Uhrzeigersinn)
@@ -42,12 +42,12 @@ double g_args[10];       // argv[1]...argv[9] als double
                          // g_args[0] bleibt unbenutzt
 double g_pi = M_PI;      // die Konstante Pi
 double g_max_x = MAX_X, g_max_y = MAX_Y;
-// Gr��e des Fensters in Benutzer-Koordinaten
-double g_delay = WALK_DELAY;                        // Verz�gerung in ms nach jedem Zeichnen
+// Größe des Fensters in Benutzer-Koordinaten
+double g_delay = WALK_DELAY;                        // Verzögerung in ms nach jedem Zeichnen
 double g_red = RED, g_green = GREEN, g_blue = BLUE; // Farbe des Striches
 
-// Initiale Gr��e des Variablen-Stacks (Anzahl Variablen)
-// (wird bei Bedarf mit realloc vergr��ert)
+// Initiale Größe des Variablen-Stacks (Anzahl Variablen)
+// (wird bei Bedarf mit realloc vergrößert)
 #define STACK_INIT_SIZE 100
 
 // Pointer auf den Anfang (unteres Ende) des Variablen- und Parameter-Stacks
@@ -80,8 +80,8 @@ typedef struct
     double dir;  // Richtung
 } mstack_elem_t;
 
-// Initiale Gr��e des Markierungs-Stacks (Anzahl Markierungen)
-// (wird bei Bedarf mit realloc vergr��ert)
+// Initiale Größe des Markierungs-Stacks (Anzahl Markierungen)
+// (wird bei Bedarf mit realloc vergrößert)
 #define MARK_INIT_SIZE 100
 
 // Pointer auf die unterste Markierung am Stack (Stack-Anfang, immer 0/0)
@@ -91,7 +91,7 @@ static mstack_elem_t *top_mark = NULL;
 // Pointer hinter das Ende des derzeit angelegten Stacks
 static mstack_elem_t *end_marks = NULL;
 
-// Source-Position Zeile 1 / Spalte 1 f�r Fehlermeldungen beim Initialisieren
+// Source-Position Zeile 1 / Spalte 1 für Fehlermeldungen beim Initialisieren
 static const srcpos_t startpos = {1, 1};
 
 // Hauptfunktionen des Interpreters
@@ -105,7 +105,7 @@ static void slist(const treenode_t *t);
 
 // Allgemeine Hilfsfunktionen
 
-// Mach aus Winkelgrad Bogenma�
+// Mach aus Winkelgrad Bogenmaß
 static double to_rad(double x);
 // Normalisiere die Richtung auf 0...360
 static double to_range(double x);
@@ -122,10 +122,10 @@ static bool to_y_pixel(double y, int *yp);
 static void walk(double x, double y, type_t t);
 // "gleich +- Rundungsfehler"-Vergleich
 static bool eps_equal(double x, double y);
-// Beende das Programm normal (END_DELAY warten, Grafik schlie�en)
+// Beende das Programm normal (END_DELAY warten, Grafik schließen)
 static void end_prog(void);
 
-// Hilfsfunktionen f�r Variablen
+// Hilfsfunktionen für Variablen
 
 // Liefert einen Pointer auf den Wert der Variablen t
 // Bei lokalen Variablen:
@@ -139,29 +139,29 @@ static double *var_ptr(const treenode_t *t, bool ro);
 // wird die bestehende Instanz verwendet, sonst eine neue angelegt
 static double *set_var(const treenode_t *t, const treenode_t *exp);
 
-// Hilfsfunktionen f�r Funktionen & Stack der Variablen und Parameter
+// Hilfsfunktionen für Funktionen & Stack der Variablen und Parameter
 
 // Initialisiert den Stack
 static void init_stack(void);
 // Legt einen Eintrag auf den Stack
-// Macht den Stack bei Bedarf gr��er
-// Mit var gleich NULL auch f�r den Funktions-Trenn-Eintrag verwendet
+// Macht den Stack bei Bedarf größer
+// Mit var gleich NULL auch für den Funktions-Trenn-Eintrag verwendet
 static vstack_elem_t *push(const nameentry_t *var, double val, const srcpos_t *pos);
 // Anzahl der Parameter einer Funktion
 static int param_cnt(const funcdef_t *f);
-// Pr�ft, ob die Argument-Anzahl im Knoten t gleich expected ist
+// Prüft, ob die Argument-Anzahl im Knoten t gleich expected ist
 // Wenn nicht: Fehlermeldung ausgeben und Programm beenden
 static void check_arg_cnt(const treenode_t *t, int expected);
 // Beginnt einen Funktions- oder Pfadaufruf:
 // - Variablen-Stackframe anlegen
 // - Parameter ausrechnen und anlegen
 static void start_call(const funcdef_t *f, const treenode_t *t);
-// R�umt den Var-Stack am Ende eines Funktions- oder Pfadaufrufs wieder auf:
+// Räumt den Var-Stack am Ende eines Funktions- oder Pfadaufrufs wieder auf:
 // Entfernt die lokalen Variablen und Parameter vom Stack
 static void end_call(void);
-// F�hrt einen Calc-Funktions-Aufruf aus
+// Fährt einen Calc-Funktions-Aufruf aus
 static double fcall(const treenode_t *t);
-// F�hrt einen Pfad-Funktions-Aufruf aus
+// Fährt einen Pfad-Funktions-Aufruf aus
 static void pcall(const treenode_t *t);
 
 // Stack der Positions-Marken
@@ -171,12 +171,12 @@ static void init_marks(void);
 // Speichert die aktuelle Position auf dem Stack
 static void push_mark(const srcpos_t *pos);
 // Entfernt die oberste Marke vom Stack
-// (au�er wir sind schon bei der letzten Markierung am Stack)
+// (außer wir sind schon bei der letzten Markierung am Stack)
 static void pop_mark(void);
 
 // Allgemeine Hilfsfunktionen
 
-// Mach aus Winkelgrad Bogenma�
+// Mach aus Winkelgrad Bogenmaß
 static double to_rad(double x)
 {
     return (x * (2 * M_PI / 360));
@@ -238,7 +238,7 @@ static void walk(double x, double y, type_t t)
         }
         else
         {
-            printf("Linie %.2f/%.2f - %.2f/%.2f ist au�erhalb des Fensters\n",
+            printf("Linie %.2f/%.2f - %.2f/%.2f ist außerhalb des Fensters\n",
                    g_x, g_y, x, y);
         }
     }
@@ -258,7 +258,7 @@ static bool eps_equal(double x, double y)
     return fabs(x - y) <= eps;
 }
 
-// Beende das Programm normal (END_DELAY warten, Grafik schlie�en)
+// Beende das Programm normal (END_DELAY warten, Grafik schließen)
 static void end_prog(void)
 {
     sdlMilliSleep(END_DELAY);
@@ -266,7 +266,7 @@ static void end_prog(void)
     exit(EXIT_SUCCESS);
 }
 
-// Funktionen f�r Variablen
+// Funktionen für Variablen
 
 // Liefert einen Pointer auf den Wert der Variablen t
 // Bei lokalen Variablen:
@@ -278,8 +278,8 @@ static double *var_ptr(const treenode_t *t, bool ro)
     switch (n->type)
     {
     case name_var:
-        // Stack vom Top abw�rts durchsuchen,
-        // h�chstens bis zum NULL-Eintrag,
+        // Stack vom Top abwärts durchsuchen,
+        // höchstens bis zum NULL-Eintrag,
         // der die Variablen und Parameter der aktuellen Funktion begrenzt
         for (vstack_elem_t *p = stack_top; p->name != NULL; --p)
         {
@@ -317,8 +317,8 @@ static double *set_var(const treenode_t *t, const treenode_t *exp)
     switch (n->type)
     {
     case name_var:
-        // Stack vom Top abw�rts durchsuchen,
-        // h�chstens bis zum NULL-Eintrag,
+        // Stack vom Top abwärts durchsuchen,
+        // höchstens bis zum NULL-Eintrag,
         // der die Variablen und Parameter der aktuellen Funktion begrenzt
         for (vstack_elem_t *p = stack_top; p->name != NULL; --p)
         {
@@ -348,7 +348,7 @@ static double *set_var(const treenode_t *t, const treenode_t *exp)
     }
 }
 
-// Funktionen f�r Funktionen
+// Funktionen für Funktionen
 
 // Initialisiert den Stack
 static void init_stack(void)
@@ -356,14 +356,14 @@ static void init_stack(void)
     stack = stack_top = (vstack_elem_t *)malloc(STACK_INIT_SIZE * sizeof(vstack_elem_t));
     mem_check(stack, "die ersten Variablen", &startpos);
     stack_end = stack + STACK_INIT_SIZE;
-    // der Stack enth�lt am Boden immer ein NULL-Element
+    // der Stack enthält am Boden immer ein NULL-Element
     stack_top->name = NULL;
     stack_top->val = 0;
 }
 
 // Legt einen Eintrag auf den Stack
-// Macht den Stack bei Bedarf gr��er
-// Mit var gleich NULL auch f�r den Funktions-Trenn-Eintrag verwendet
+// Macht den Stack bei Bedarf größer
+// Mit var gleich NULL auch für den Funktions-Trenn-Eintrag verwendet
 static vstack_elem_t *push(const nameentry_t *var, double val, const srcpos_t *pos)
 {
     if (var != NULL)
@@ -371,7 +371,7 @@ static vstack_elem_t *push(const nameentry_t *var, double val, const srcpos_t *p
     ++stack_top;
     if (stack_top == stack_end)
     {
-        // Stack ist voll, Gr��e verdoppeln
+        // Stack ist voll, Größe verdoppeln
         ptrdiff_t fill = stack_top - stack;
         ptrdiff_t size = 2 * fill;
         stack = (vstack_elem_t *)realloc(stack, size * sizeof(vstack_elem_t));
@@ -396,7 +396,7 @@ static int param_cnt(const funcdef_t *f)
     }
 }
 
-// Pr�ft, ob die Argument-Anzahl im Knoten t gleich expected ist
+// Prüft, ob die Argument-Anzahl im Knoten t gleich expected ist
 // Wenn nicht: Fehlermeldung ausgeben und Programm beenden
 static void check_arg_cnt(const treenode_t *t, int expected)
 {
@@ -445,11 +445,11 @@ static void start_call(const funcdef_t *f, const treenode_t *t)
     push_stacktrace(stack_obj);
 }
 
-// R�umt den Var-Stack am Ende eines Funktions- oder Pfadaufrufs wieder auf:
+// Räumt den Var-Stack am Ende eines Funktions- oder Pfadaufrufs wieder auf:
 // Entfernt die lokalen Variablen und Parameter vom Stack
 static void end_call(void)
 {
-    // Entferne alle Eintr�ge des aktuellen Stack-Frames bis zum NULL-Element
+    // Entferne alle Einträge des aktuellen Stack-Frames bis zum NULL-Element
     while (stack_top->name != NULL)
     {
         --stack_top; // vom Stack entfernen
@@ -461,7 +461,7 @@ static void end_call(void)
     pop_stacktrace();
 }
 
-// F�hrt einen Calc-Funktions-Aufruf aus
+// Führt einen Calc-Funktions-Aufruf aus
 static double fcall(const treenode_t *t)
 {
     const nameentry_t *n = t->d.p_name;
@@ -511,7 +511,7 @@ static double fcall(const treenode_t *t)
     }
 }
 
-// F�hrt einen Pfad-Funktions-Aufruf aus
+// Führt einen Pfad-Funktions-Aufruf aus
 static void pcall(const treenode_t *t)
 {
     const nameentry_t *n = t->d.p_name;
@@ -532,7 +532,7 @@ static void pcall(const treenode_t *t)
     end_call();
 }
 
-// Funktionen f�r den Markierungs-Stack
+// Funktionen für den Markierungs-Stack
 
 // Initialisiert den Stack
 static void init_marks(void)
@@ -540,7 +540,7 @@ static void init_marks(void)
     first_mark = top_mark = (mstack_elem_t *)malloc(MARK_INIT_SIZE * sizeof(mstack_elem_t));
     mem_check(first_mark, "die ersten Wegmarkierungen", &startpos);
     end_marks = first_mark + MARK_INIT_SIZE;
-    // Der Mark-Stack enth�lt am Boden immer die Position 0/0
+    // Der Mark-Stack enthält am Boden immer die Position 0/0
     top_mark->x = 0;
     top_mark->y = 0;
     top_mark->dir = 0;
@@ -552,7 +552,7 @@ static void push_mark(const srcpos_t *pos)
     ++top_mark;
     if (top_mark == end_marks)
     {
-        // Stack ist voll, Gr��e verdoppeln
+        // Stack ist voll, Größe verdoppeln
         ptrdiff_t fill = top_mark - first_mark;
         ptrdiff_t size = 2 * fill;
         first_mark = (mstack_elem_t *)realloc(first_mark, size * sizeof(mstack_elem_t));
@@ -566,7 +566,7 @@ static void push_mark(const srcpos_t *pos)
 }
 
 // Entfernt die oberste Marke vom Stack
-// (au�er wir sind schon bei der letzten Markierung am Stack)
+// (außer wir sind schon bei der letzten Markierung am Stack)
 static void pop_mark(void)
 {
     if (top_mark > first_mark)
@@ -691,7 +691,7 @@ static void slist(const treenode_t *t)
             break;
         case keyw_stop:
             // endlos kurze MilliSleep's, damit man das Programm abbrechen kann
-            // (ein langes MilliSleep w�re nicht unterbrechbar)
+            // (ein langes MilliSleep wäre nicht unterbrechbar)
             printf("stopped\n");
             for (;;)
             {
@@ -825,8 +825,8 @@ void print(const treenode_t *tree, const int indent)
 
 // Die Hauptfunktion des Evaluators:
 // Initialisiere die Verarbeitung und die Grafik
-// und arbeite den Syntaxbaum main_tree f�r das Haupprogramm ab
-// arg_cnt/arg_val ist der Teil von argc/argv, der in @1, @2, ... geh�rt
+// und arbeite den Syntaxbaum main_tree für das Haupprogramm ab
+// arg_cnt/arg_val ist der Teil von argc/argv, der in @1, @2, ... gehört
 // (ohne Programmname und Sourcefile-Name)
 void evaluate(const treenode_t *main_tree, int arg_cnt, const char *arg_val[], const bool debug)
 {

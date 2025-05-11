@@ -452,6 +452,10 @@ Params:
     }
 %%
 
+/**
+ * Berechnen der Position des Tokens im Quelltext.
+ * Diese Funktion wird aufgerufen, wenn ein Token erkannt wird.
+ */
 void update_location() {
     yylloc.first_line = yylloc.last_line;
     yylloc.first_column = yylloc.last_column;
@@ -466,7 +470,15 @@ void update_location() {
     }
 }
 
-// TODO: Doxygen
+/**
+ * Erstellt einen neuen Knoten und initialisiert ihn auf den übergebenen Typ.
+ * Der Knoten hat zunächst keine Kinder und ist nicht mit einem anderen Knoten verbunden.
+ * Zusätzlich wird die Position des Knotens im Quelltext gesetzt.
+ *
+ * @param type Der Typ des Knotens.
+ * @param loc  Die Position des Knotens im Quelltext.
+ * @return Ein Pointer auf den neu erstellten Knoten.
+ */
 treenode_t *new_node(type_t type, YYLTYPE loc) {
     treenode_t *node = (treenode_t *)malloc(sizeof(treenode_t));
 
@@ -491,16 +503,25 @@ treenode_t *new_node(type_t type, YYLTYPE loc) {
     return node;
 }
 
-// Die Funktion yyerror wird aufgerufen,
-// wenn yacc erkennt, das der eingetippte Input fehlerhaft ist
-// wir geben einfach die von yacc gelieferte Fehlermeldung aus
+/**
+ * Fehlerfunktion für den Parser.
+ * Sie wird aufgerufen, wenn ein Fehler im Quelltext gefunden wird
+ * und gibt die von yacc generierte Fehlermeldung aus.
+ *
+ * @param s Die Fehlermeldung.
+ * @return Ein Fehlercode.
+ */
 int yyerror(char *s) {
     printf("line %d: %s\n", yylineno, s);
     exit(EXIT_FAILURE);
 }
 
-// Das Hauptprogramm
-// Wir rufen einfach die von yacc generierte Parser-Funktion auf
+/**
+ * Parser-Hauptprogramm.
+ * Hier wird lediglich die von yacc generierte Parser-Funktion aufgerufen.
+ *
+ * @return Ein Pointer auf den Wurzelknoten des Baums.
+ */
 treenode_t *parse(void) {
     yyin = src_file;
 

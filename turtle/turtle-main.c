@@ -56,6 +56,7 @@ int main(int argc, const char *argv[])
         exit(EXIT_FAILURE);
     }
 
+    // Parsen der Argumente - Kopieren der Zahlen in args und prüfen auf -d
     bool debug = false;
     const char **args = (const char **)malloc((argc - 2) * sizeof(const char *));
     int args_len = 0;
@@ -86,13 +87,18 @@ int main(int argc, const char *argv[])
     prog_name = argv[0];
     file_name = argv[1];
 
+    // Parsen des Turtle-Programms und Erzeugen des Syntaxbaums
     treenode_t *main_tree = parse();
-    if (!main_tree) {
+
+    // Prüfen ob ein Syntaxbaum erzeugt wurde
+    if (main_tree == NULL) {
         exit(EXIT_FAILURE);
     }
 
+    // Initialisieren des Debug Adapters
     debug_init(debug);
 
+    // Interpretieren des Syntaxbaums
     evaluate(main_tree, args_len, args, debug);
 
     exit(EXIT_SUCCESS);
