@@ -24,7 +24,7 @@ Bei jeder Evaluierung einer Turtle Expression und Condition, sowie bei jedem Auf
 Damit der Debugger den Stacktrace verfolgen kann, werden bei jedem Aufruf und Returnen einer Turtle Routine die Debugger Funktionen `push_stacktrace()`, sowie `pop_stacktrace()` aufgerufen.
 
 ## VS-Code Extension
-Zusätzlich wurde im eine [VS-Code Extension](https://marketplace.visualstudio.com/items?itemName=niklas-simon.turtlescript) für Turtle entwickelt. Die Extension umfasst Syntaxhighlighting, sowie Support für die in VS-Code eingebaute Debugger-Oberfläche.
+Zusätzlich wurde im eine [VS-Code Extension](https://marketplace.visualstudio.com/items?itemName=niklas-simon.turtlescript) für Turtle entwickelt. Die Extension umfasst Syntaxhighlighting, sowie Support für die in VS-Code eingebaute Debugger-Oberfläche. Der Quelltext dafür ist in einem [seperaten Repository](https://github.com/niklas-simon/dhge-turtlescript-vscode) zu finden.
 
 ## Build
 ### Vorbedingungen:
